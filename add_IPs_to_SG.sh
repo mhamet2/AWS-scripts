@@ -1,8 +1,11 @@
 #!/bin/bash
+#
+#
+#
+#
 
 SCRIPT=`dirname $0`/`basename $0 .sh`
 CONFIG=$SCRIPT.config
-
 
 if [ ! -f "$CONFIG" ]; then
         echo "No configuration file found"
@@ -12,9 +15,9 @@ fi
 PROFILE=`cat $CONFIG | grep -v '\#' | grep PROFILE | sed 's/PROFILE=\(.*\)/\1/'`
 SG=`cat $CONFIG | grep -v '\#' | grep SG | sed 's/SG=\(.*\)/\1/'`
 URL=`cat $CONFIG | grep -v '\#' | grep URL | sed 's/URL=\(.*\)/\1/'`
-NS=`cat $CONFIG | grep -v '\#' | grep NS | sed 's/NS=\(.*\)/\1/'`
 destdir=`cat $CONFIG | grep -v '\#' | grep stats | sed 's/stats=\(.*\)/\1/'`
 
+NS=$(dig +nocmd +multiline +noall +answer NS $(echo $URL | awk -F'.' {'print$2"."$3'}) | head -n1 | awk {'print$5'})
 query=`dig +nocmd +multiline +noall +answer $URL @$NS`
 md5=`echo $query | md5sum | awk '{print$1}'`
 
@@ -25,6 +28,10 @@ fi
 
 if [ ! -f "$destdir/.lastmd5" ]; then
     echo `echo $md5 > $destdir/.lastmd5`
+fi
+
+if [ ! -s "$destdir/.lastmd5" ]; then
+    exit 1
 fi
 
 if grep -c --quiet $md5 $destdir/.lastmd5; then
