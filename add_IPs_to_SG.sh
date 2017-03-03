@@ -27,7 +27,8 @@ if [ ! -d "$destdir" ] ; then
 fi
 
 if [ ! -f "$destdir/.lastmd5" ]; then
-    echo `echo $md5 > $destdir/.lastmd5`
+    echo "starting..." > $destdir/.lastmd5
+    exit 1
 fi
 
 if [ ! -s "$destdir/.lastmd5" ]; then
@@ -35,13 +36,15 @@ if [ ! -s "$destdir/.lastmd5" ]; then
 fi
 
 if grep -c --quiet $md5 $destdir/.lastmd5; then
-   echo "No changes on NS, nothing to do"
+   echo "No changes on query, nothing to do"
    exit 1
 else
 
   oldIPs=`aws --profile $PROFILE ec2 describe-security-groups --filters Name=group-name,Values=$SG --query 'SecurityGroups[*].IpPermissions[*].IpRanges[*].CidrIp' --output text | tr "\t" "\n" | sort | uniq`
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
   IFS=$'\n'
-
   for ip in $oldIPs
     do
       aws --profile $PROFILE ec2 revoke-security-group-ingress --group-name $SG --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 80, "ToPort": 80,"IpRanges": [{"CidrIp": "'$ip'"}]}]'
@@ -49,9 +52,9 @@ else
     done
   for ip in $query
     do
-      ip=`echo $ip | awk '{print$5}'`
+      ip=`echo $ip | awk '{print $5}'`
       aws --profile $PROFILE ec2 authorize-security-group-ingress --group-name $SG --protocol tcp --port 80 --cidr $ip/32
       aws --profile $PROFILE ec2 authorize-security-group-ingress --group-name $SG --protocol tcp --port 443 --cidr $ip/32
     done
-
+  echo `echo $md5 > $destdir/.lastmd5`
 fi
