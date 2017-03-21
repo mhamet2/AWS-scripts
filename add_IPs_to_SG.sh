@@ -31,16 +31,16 @@ if [ ! -d "$destdir" ] ; then
     exit 1
 fi
 
-if [ ! -f "$destdir/.lastmd5" ]; then
-    echo "starting..." > $destdir/.lastmd5
+if [ ! -f "$destdir/$URL.lastmd5" ]; then
+    echo "starting..." > $destdir/$URL.lastmd5
     #exit 1
 fi
 
-if [ ! -s "$destdir/.lastmd5" ]; then
+if [ ! -s "$destdir/$URL.lastmd5" ]; then
     exit 1
 fi
 
-if grep -c --quiet $md5 $destdir/.lastmd5; then
+if grep -c --quiet $md5 $destdir/$URL.lastmd5; then
    echo "No changes on query, nothing to do"
    exit 1
 else
@@ -61,5 +61,5 @@ else
       aws --profile $PROFILE ec2 authorize-security-group-ingress --group-name $SG --protocol tcp --port 80 --cidr $ip/32
       aws --profile $PROFILE ec2 authorize-security-group-ingress --group-name $SG --protocol tcp --port 443 --cidr $ip/32
     done
-  echo `echo $md5 > $destdir/.lastmd5`
+  echo `echo $md5 > $destdir/$URL.lastmd5`
 fi
