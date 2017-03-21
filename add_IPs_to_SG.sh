@@ -3,9 +3,14 @@
 #
 #
 #
-
+PATH="/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin"
 SCRIPT=`dirname $0`/`basename $0 .sh`
-CONFIG=$SCRIPT.config
+
+if [ -z "$1" ]; then
+  CONFIG=$SCRIPT.config
+else
+  CONFIG=$1
+fi
 
 if [ ! -f "$CONFIG" ]; then
         echo "No configuration file found"
@@ -28,7 +33,7 @@ fi
 
 if [ ! -f "$destdir/.lastmd5" ]; then
     echo "starting..." > $destdir/.lastmd5
-    exit 1
+    #exit 1
 fi
 
 if [ ! -s "$destdir/.lastmd5" ]; then
