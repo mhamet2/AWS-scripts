@@ -20,7 +20,7 @@ URL=`cat $CONFIG | grep -v '\#' | grep URL | sed 's/URL=\(.*\)/\1/'`
 destdir=`cat $CONFIG | grep -v '\#' | grep stats | sed 's/stats=\(.*\)/\1/'`
 VPC=`cat $CONFIG | grep -v '\#' | grep VPC | sed 's/VPC=\(.*\)/\1/'`
 
-NS=$(dig +nocmd +multiline +noall +answer NS $(echo $URL | awk -F'.' {'print$2"."$3'}) | head -n1 | awk {'print$5'})
+NS=$(dig +nocmd +multiline +noall +answer NS $(echo $URL | awk -F'.' {'print$2"."$3'}) | sort | head -n1 | awk {'print$5'})
 query=`dig +nocmd +multiline +noall +answer $URL @$NS | sort`
 md5=`echo $query | md5sum | awk '{print$1}'`
 
