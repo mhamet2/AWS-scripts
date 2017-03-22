@@ -21,7 +21,7 @@ destdir=`cat $CONFIG | grep -v '\#' | grep stats | sed 's/stats=\(.*\)/\1/'`
 VPC=`cat $CONFIG | grep -v '\#' | grep VPC | sed 's/VPC=\(.*\)/\1/'`
 
 NS=$(dig +nocmd +multiline +noall +answer NS $(echo $URL | awk -F'.' {'print$2"."$3'}) | head -n1 | awk {'print$5'})
-query=`dig +nocmd +multiline +noall +answer $URL @$NS`
+query=`dig +nocmd +multiline +noall +answer $URL @$NS | sort`
 md5=`echo $query | md5sum | awk '{print$1}'`
 
 if [ ! -d "$destdir" ] ; then
@@ -43,7 +43,7 @@ if grep -c --quiet $md5 $destdir/$URL.lastmd5; then
    exit 1
 else
 
-  oldIPs=`aws --profile $PROFILE ec2 describe-security-groups --filters Name=group-name,Values=$SG --query 'SecurityGroups[*].IpPermissions[*].IpRanges[*].CidrIp' --output text | tr "\t" "\n" | sort | uniq`
+  oldIPs=`aws --profile $PROFILE ec2 describe-security-groups --filters Name=group-id,Values=$SG --query 'SecurityGroups[*].IpPermissions[*].IpRanges[*].CidrIp' --output text | tr "\t" "\n" | sort | uniq`
   if [ $? -ne 0 ]; then
     exit 1
   fi
